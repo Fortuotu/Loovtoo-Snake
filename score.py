@@ -28,7 +28,8 @@ class ScorePoint:
         self.big = False
         self.power_up_target = None
         self.powerup_ticks = 0
-        self.powerup_duration = 1000
+        self.powerup_duration = SNAKE_POWERUP_DURATION
+        self.last_rainbow_change = 0
 
 
         self.transparency = None
@@ -43,12 +44,23 @@ class ScorePoint:
 
     def check_powerup_timeout(self):
         if self.power_up_target is not None:
+            
+            self.power_up_target.rainbow_pallete[
+                randint(0, len(self.power_up_target.rainbow_pallete) - 1)
+            ] = [randint(0, 255) for _ in range(3)]
+            self.last_rainbow_change = pygame.time.get_ticks()
+
             if pygame.time.get_ticks() - self.powerup_ticks >= self.powerup_duration:
                 self.power_up_target.speed = SNAKE_SPEED
+                self.power_up_target.rainbow_pallete = None
+                self.power_up_target.powerup_rainbow = False
+                self.power_up_target.powerup_score_entity = None
                 self.power_up_target = None
+                self.powerup_ticks = 0
+                self.powerup_duration = SNAKE_POWERUP_DURATION
 
     def reposition(self):
-        if not randint(0, 1) and self.power_up_target is None:
+        if not randint(0, POWERUP_SPAWNRATE) and self.power_up_target is None:
             self.big = True
         else:
             self.big = False
@@ -61,11 +73,24 @@ class ScorePoint:
         for snake in self.snakes:
             if snake.rect.topleft == self.rect.topleft:
                 if self.big:
-                    self.power_up_target = snake
-                    self.power_up_target.speed = round(SNAKE_SPEED / 2)
-                    self.powerup_ticks = pygame.time.get_ticks()
+                    if snake.powerup_rainbow:
+                        snake.powerup_score_entity.powerup_duration += SNAKE_POWERUP_DURATION
+                    else:
+                        self.power_up_target = snake
+                        self.power_up_target.powerup_score_entity = self
+                        self.power_up_target.speed = round(SNAKE_SPEED / 3)
+                        self.powerup_ticks = pygame.time.get_ticks()
+                        snake.rainbow_pallete = [
+                            [randint(0, 255) for _ in range(3)] for _ in range(snake.bodyparts + 1)
+                        ]
+                        self.last_rainbow_change = pygame.time.get_ticks()
+                        self.power_up_target.powerup_rainbow = True
                 if snake.fade:
                     snake.one_fade_index *= snake.bodyparts / (snake.bodyparts + 1)
+                if snake.powerup_rainbow:
+                    snake.rainbow_pallete.append(
+                        [randint(0, 255) for _ in range(3)]
+                    )
                 snake.bodyparts += 1
                 self.reposition()
 

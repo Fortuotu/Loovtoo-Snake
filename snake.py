@@ -1,3 +1,4 @@
+from random import randint
 import pygame
 from settings import *
 
@@ -43,6 +44,11 @@ class Snake:
         self.color = color
         self.transparency = None
 
+        # powerup
+        self.rainbow_pallete = None
+        self.powerup_rainbow = False
+        self.powerup_score_entity = None
+
         # keybinds
         if keybinds is None:
             self.keybinds = default_keybinds
@@ -68,6 +74,9 @@ class Snake:
             self.one_fade_index = fade / sum(range(1, self.bodyparts + 1))
         self.surf = pygame.Surface((TILE_SIZE - 1, TILE_SIZE - 1))
         self.surf.fill(self.color)
+
+    def die(self):
+        pass
 
     def check_collision(self):
         # collision with snakes:
@@ -109,6 +118,10 @@ class Snake:
     def draw(self):
         # draw head
         self.surf.set_alpha(self.transparency)
+        if self.powerup_rainbow:
+            self.surf.fill(self.rainbow_pallete[0])
+        else:
+            self.surf.fill(self.color)
         self.screen.blit(self.surf, (self.rect.x + .5, self.rect.y + .5))
 
 
@@ -119,7 +132,10 @@ class Snake:
                     TILE_SIZE - (i + 1) * (self.one_fade_index * 2), 
                     TILE_SIZE - (i + 1) * (self.one_fade_index * 2)
                 ))
-                surf.fill(self.color)
+                if self.powerup_rainbow:
+                    surf.fill(self.rainbow_pallete[i + 1])
+                else:
+                    surf.fill(self.color)
                 surf.set_alpha(self.transparency)
                 self.screen.blit(
                     surf,

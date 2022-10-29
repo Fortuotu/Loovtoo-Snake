@@ -25,6 +25,7 @@ class Game:
         font = pygame.font.Font(font_file, 70)
         self.logo_surface = font.render('Snake-Fight', False, (251, 250, 245))
         self.logo_rect = self.logo_surface.get_rect(center=(SCREEN_WIDTH / 2, 100))
+
         self.menu_buttons = (
             Button(self.screen, self.play, (SCREEN_WIDTH / 2, 325), 'play', font_file, 50),
             Button(self.screen, self.options, (SCREEN_WIDTH / 2, 450), 'options', font_file, 50),
@@ -35,6 +36,9 @@ class Game:
             Button(self.screen, self.menu, (SCREEN_WIDTH / 2, 450), 'menu', font_file, 50),
             Button(self.screen, self.restart, (SCREEN_WIDTH / 2, 575), 'restart', font_file, 50)
         )
+        self.options_buttons = (
+            Button(self.screen, self.options, (85, 65), 'back', font_file, 35),
+        )
 
         # text
         self.paused_text = font.render('paused', False, (251, 250, 245))
@@ -44,7 +48,7 @@ class Game:
         self.snakes = []
         self.snakes.append(Snake(self, (0, SCREEN_HEIGHT / 4 - TILE_SIZE), (0, 255, 0), (TILE_SIZE, 0), fade=20))
         self.snakes.append(Snake(self, (SCREEN_WIDTH - TILE_SIZE, (SCREEN_HEIGHT / 4) * 3), (0, 0, 255), (-TILE_SIZE, 0), keybinds={'Up': pygame.K_i, 'Down': pygame.K_k, 'Left': pygame.K_j, 'Right': pygame.K_l}, fade=20))
-        self.score_points = [ScorePoint(self) for _ in range(1)]
+        self.score_points = [ScorePoint(self) for _ in range(25)]
     
     def play(self):
         self.in_menu = False
@@ -58,7 +62,7 @@ class Game:
         self.running = False
     
     def options(self):
-        self.in_options = True
+        self.in_options = not self.in_options
     
     def menu(self):
         self.in_menu = True
@@ -75,7 +79,8 @@ class Game:
             for msp in self.menu_score_points:
                 msp.update()
             if self.in_options:
-                pass
+                for button in self.options_buttons:
+                    button.update()
             else:
                 self.screen.blit(self.logo_surface, self.logo_rect)
                 for button in self.menu_buttons:
