@@ -1,6 +1,7 @@
 import pygame
 from settings import *
 from random import choice, randint
+from audio_util import *
 
 positions = (
     [i for i in range(0, SCREEN_WIDTH, TILE_SIZE)],
@@ -20,6 +21,7 @@ colors = (
 class ScorePoint:
 
     def __init__(self, game):
+        self.game = game
         self.screen = game.screen
         self.snakes = game.snakes
         self.color = choice(colors)
@@ -64,15 +66,22 @@ class ScorePoint:
             self.big = True
         else:
             self.big = False
-        self.rect.topleft = (choice(positions[0]),
-                            choice(positions[1]))
-        self.repositioning_speed = TILE_SIZE
-        self.color = choice(colors)
+        while True:
+            self.rect.topleft = (choice(positions[0]),
+                                choice(positions[1]))
+            for wall in self.game.walls:
+                if wall.rect.topleft == self.rect.topleft:
+                    break
+            else:
+                self.repositioning_speed = TILE_SIZE
+                self.color = choice(colors)
+                break
 
     def check_collision(self):
         for snake in self.snakes:
             if snake.rect.topleft == self.rect.topleft:
                 if self.big:
+                    play_sound_effect('audio/powerUp.wav')
                     if snake.powerup_rainbow:
                         snake.powerup_score_entity.powerup_duration += SNAKE_POWERUP_DURATION
                     else:
@@ -91,6 +100,8 @@ class ScorePoint:
                     snake.rainbow_pallete.append(
                         [randint(0, 255) for _ in range(3)]
                     )
+                if not self.big:
+                    play_sound_effect('audio/scorePointSpawn.wav')
                 snake.bodyparts += 1
                 self.reposition()
 

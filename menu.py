@@ -2,7 +2,7 @@ import pygame
 from score import ScorePoint, positions, colors
 from random import randint, choice
 from settings import *
-
+from audio_util import *
 
 class Button:
 
@@ -35,7 +35,10 @@ class Button:
 
             if self.was_held and not is_held:
                 self.was_held = is_held
+
+                # button was clicked
                 self.event()
+                play_sound_effect('audio/click.wav')
                 return
 
             self.was_held = is_held
@@ -54,22 +57,6 @@ class Button:
         self.check_click()
         self.draw()
 
-class InputBox:
-
-    def __init__(self):
-        self.text = ''
-
-    def get_input(self):
-        keys = pygame.key.get_pressed()
-
-        print(keys)
-    
-    def draw(self):
-        pass
-
-    def update(self):
-        self.get_input()
-        self.draw()
 
 class MenuScorePoint(ScorePoint):
 
@@ -88,5 +75,3 @@ class MenuScorePoint(ScorePoint):
         self.draw()
         if not randint(0, 60 * self.average_seconds_between_repositions):
             self.reposition()
-
-
